@@ -4,6 +4,7 @@ go 1.23.1
 
 require (
 	github.com/hashicorp/go-hclog v1.6.3
+	golang.org/x/exp v0.0.0-20240909161429-701f63a606c0
 	google.golang.org/grpc v1.67.0
 	google.golang.org/protobuf v1.34.2
 )
