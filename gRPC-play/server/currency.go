@@ -99,6 +99,34 @@ func (c Currency) SubscribeRates(src currency.Currency_SubscribeRatesServer) err
 		if !ok {
 			rrs = []*currency.RateRequest{}
 		}
+
+		var validationErr *status.Status
+
+		for _, v := range rrs {
+			if v.Base == rr.Base || v.Destination == rr.Destination {
+				validationErr = status.Newf(
+					codes.AlreadyExists,
+					"Unable to subscirbe for already existed currency.",
+				)
+			}
+			validationErr, err = validationErr.WithDetails(rr)
+			if err != nil {
+				c.log.Error("Unable to add metadata to the status", "error", err)
+				break
+			}
+		}
+
+		if validationErr != nil {
+			src.Send(
+				&currency.StreamingRateResponse{
+					Message: &currency.StreamingRateResponse_Error{
+						Error: validationErr.Proto(),
+					},
+				},
+			)
+			continue
+		}
+
 		rrs = append(rrs, rr)
 		c.subscriptions[src] = rrs
 		c.log.Info("The curren subscription table is: ", src, rrs)

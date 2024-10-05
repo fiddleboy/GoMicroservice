@@ -2,11 +2,13 @@ syntax = "proto3";
 
 package currency;
 
+import "protos/google/rpc/status.proto";
+
 option go_package = "protos/currency;currency";
 
 service Currency {
     rpc GetRate(RateRequest) returns (RateResponse);
-    rpc SubscribeRates(stream RateRequest) returns (stream RateResponse);
+    rpc SubscribeRates(stream RateRequest) returns (stream StreamingRateResponse);
 }
 
 message RateRequest {
@@ -16,6 +18,13 @@ message RateRequest {
 
 message RateResponse {
     double Rate = 1;
+}
+
+message StreamingRateResponse {
+    oneof message {
+        RateResponse rate_reponse = 1;
+        google.rpc.Status error = 2;
+    }
 }
 
 enum Currencies {
